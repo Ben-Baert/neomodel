@@ -32,6 +32,7 @@ def ensure_connection(func):
 
         if not _db.url:
             _db.set_connection(config.DATABASE_URL)
+            
         return func(self, *args, **kwargs)
 
     return wrapper
@@ -84,7 +85,7 @@ class Database(local, NodeClassRegistry):
         self._pid = None
         self.database = None
 
-    def set_connection(self, url):
+    def set_connection(self, url, database='neo4j'):
         """
         Sets the connection URL to the address a Neo4j server is set up at
         """
@@ -102,6 +103,7 @@ class Database(local, NodeClassRegistry):
                                            encrypted=config.ENCRYPTED_CONNECTION,
                                            max_connection_pool_size=config.MAX_CONNECTION_POOL_SIZE)
         self.url = url
+        self.database = database
         self._pid = os.getpid()
         self._active_transaction = None
 
@@ -205,12 +207,12 @@ class Database(local, NodeClassRegistry):
         """
 
         if self._pid != os.getpid():
-            self.set_connection(self.url)
+            self.set_connection(self.url, database=self.database)
 
         if self._active_transaction:
             session = self._active_transaction
         else:
-            session = self.driver.session()
+            session = self.driver.session(database=self.database)
 
         try:
             # Retrieve the data
