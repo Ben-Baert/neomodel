@@ -1,5 +1,6 @@
 AUTO_INSTALL_LABELS = False
 DATABASE_URL = 'bolt://neo4j:foobar@localhost:7687'
+AUTH = None
 DATABASE = 'neo4j'
 FORCE_TIMEZONE = False
 ENCRYPTED_CONNECTION = False

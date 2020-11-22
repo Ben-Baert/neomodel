@@ -30,9 +30,10 @@ def ensure_connection(func):
         else:
             _db = self
 
-        if not _db.url or _db.database:
+        if not _db.url or _db.auth or  _db.database:
             _db.url = _db.url or config.DATABASE_URL
             _db.database = _db.database or config.DATABASE
+            _db.auth = _db.auth or config.AUTH
             _db.set_connection(config.DATABASE_URL, database=_db.database)
             
         return func(self, *args, **kwargs)
@@ -83,25 +84,18 @@ class Database(local, NodeClassRegistry):
         """
         self._active_transaction = None
         self.url = None
+        self.auth = None
         self.driver = None
         self._pid = None
         self.database = None
 
-    def set_connection(self, url, database='neo4j'):
+    def set_connection(self, url, auth, database):
         """
         Sets the connection URL to the address a Neo4j server is set up at
         """
-        u = urlparse(url)
-
-        if u.netloc.find('@') > -1 and (u.scheme == 'bolt' or u.scheme == 'bolt+routing' or u.scheme == 'neo4j'):
-            credentials, hostname = u.netloc.rsplit('@', 1)
-            username, password, = credentials.split(':')
-        else:
-            raise ValueError("Expecting url format: bolt://user:password@localhost:7687"
-                             " got {0}".format(url))
-
-        self.driver = GraphDatabase.driver(u.scheme + '://' + hostname,
-                                           auth=basic_auth(username, password),
+        
+        self.driver = GraphDatabase.driver(self.url,
+                                           auth=self.auth,
                                            encrypted=config.ENCRYPTED_CONNECTION,
                                            max_connection_pool_size=config.MAX_CONNECTION_POOL_SIZE)
         self.url = url
