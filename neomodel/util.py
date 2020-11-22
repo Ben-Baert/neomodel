@@ -30,11 +30,10 @@ def ensure_connection(func):
         else:
             _db = self
 
-        if not _db.url or _db.auth or  _db.database:
-            _db.url = _db.url or config.DATABASE_URL
-            _db.database = _db.database or config.DATABASE
-            _db.auth = _db.auth or config.AUTH
-            _db.set_connection(_db.url, auth=self.auth, database=_db.database)
+        _db.url = _db.url or config.DATABASE_URL
+        _db.database = _db.database or config.DATABASE
+        _db.auth = _db.auth or config.AUTH
+        _db.set_connection(_db.url, auth=_db.auth, database=_db.database)
             
         return func(self, *args, **kwargs)
 
