@@ -94,11 +94,12 @@ class Database(local, NodeClassRegistry):
         Sets the connection URL to the address a Neo4j server is set up at
         """
         
-        self.driver = GraphDatabase.driver(self.url,
-                                           auth=self.auth,
+        self.driver = GraphDatabase.driver(url,
+                                           auth=auth,
                                            encrypted=config.ENCRYPTED_CONNECTION,
                                            max_connection_pool_size=config.MAX_CONNECTION_POOL_SIZE)
         self.url = url
+        self.auth = auth
         self.database = database
         self._pid = os.getpid()
         self._active_transaction = None
