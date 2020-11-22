@@ -30,8 +30,10 @@ def ensure_connection(func):
         else:
             _db = self
 
-        if not _db.url:
-            _db.set_connection(config.DATABASE_URL)
+        if not _db.url or _db.database:
+            _db.url = _db.url or config.DATABASE_URL
+            _db.database = _db.database or config.DATABASE
+            _db.set_connection(config.DATABASE_URL, database=_db.database)
             
         return func(self, *args, **kwargs)
 
