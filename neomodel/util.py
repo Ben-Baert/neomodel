@@ -34,7 +34,7 @@ def ensure_connection(func):
             _db.url = _db.url or config.DATABASE_URL
             _db.database = _db.database or config.DATABASE
             _db.auth = _db.auth or config.AUTH
-            _db.set_connection(config.DATABASE_URL, database=_db.database)
+            _db.set_connection(config.DATABASE_URL, auth=self.auth, database=_db.database)
             
         return func(self, *args, **kwargs)
 
@@ -204,7 +204,7 @@ class Database(local, NodeClassRegistry):
         """
 
         if self._pid != os.getpid():
-            self.set_connection(self.url, database=self.database)
+            self.set_connection(self.url, auth=self.auth, database=self.database)
 
         if self._active_transaction:
             session = self._active_transaction
@@ -236,7 +236,7 @@ class Database(local, NodeClassRegistry):
                     raise exc_info[1]
         except SessionExpired:
             if retry_on_session_expire:
-                self.set_connection(self.url)
+                self.set_connection(self.url, auth=self.auth)
                 return self.cypher_query(query=query,
                                          params=params,
                                          handle_unique=handle_unique,
